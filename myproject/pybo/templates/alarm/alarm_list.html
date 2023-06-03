@@ -1,0 +1,14 @@
+<!-- 질문 목록 -->
+{% if alarm_list %}
+<ul>
+  {% for alarm in alarm_list %}
+  <li>
+    <a href="{{ url_for('alarm.detail', alarm_id=alarm.id) }}"
+      >{{ alarm.alarmTime }}</a
+    >
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>알람이 없습니다.</p>
+{% endif %}

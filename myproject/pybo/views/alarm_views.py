@@ -12,7 +12,9 @@ bp = Blueprint('alarm', __name__, url_prefix='/alarm')
 
 @bp.route('/ilst/')
 def _list():
+    page = request.args.get('page', type=int, default=1)
     alarm_list = Alarm.query.order_by(Alarm.alarmTime.asc())
+    alarm_list = alarm_list.paginate(page=page, per_page=10)
     return render_template('alarm/alarm_list.html', alarm_list=alarm_list)
 
 @bp.route('/detail/<int:alarm_id>/')
@@ -29,3 +31,10 @@ def create():
         db.session.commit()
         return redirect(url_for('main.index'))
     return render_template('alarm/alarm_form.html', form=form)
+
+@bp.route('/delete/<int:alarm_id>')
+def delete(alarm_id):
+    alarm = Alarm.query.get_or_404(alarm_id)
+    db.session.delete(alarm)
+    db.session.commit()
+    return redirect(url_for('main.index'))

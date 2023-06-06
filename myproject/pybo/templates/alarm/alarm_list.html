@@ -1,14 +1,31 @@
-<!-- 질문 목록 -->
-{% if alarm_list %}
-<ul>
-  {% for alarm in alarm_list %}
-  <li>
-    <a href="{{ url_for('alarm.detail', alarm_id=alarm.id) }}"
-      >{{ alarm.alarmTime }}</a
-    >
-  </li>
-  {% endfor %}
-</ul>
-{% else %}
-<p>알람이 없습니다.</p>
-{% endif %}
+{% extends 'base.html' %} {% block content %}
+<div class="container my-3">
+  <table class="table">
+    <thead>
+      <tr class="table-dark">
+        <th>번호</th>
+        <th>제목</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% if alarm_list %} {% for alarm in alarm_list %}
+      <tr>
+        <td>{{ loop.index }}</td>
+        <td>
+          <a href="{{ url_for('alarm.detail', alarm_id=alarm.id) }}"
+            >{{ alarm.alarmTime }}</a
+          >
+        </td>
+      </tr>
+      {% endfor %} {% else %}
+      <tr>
+        <td colspan="3">질문이 없습니다.</td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+  <a href="{{ url_for('alarm.create') }}" class="btn btn-primary"
+    >질문 등록하기</a
+  >
+</div>
+{% endblock %}

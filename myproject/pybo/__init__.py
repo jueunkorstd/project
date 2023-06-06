@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
@@ -6,7 +6,6 @@ import config
 
 db = SQLAlchemy()
 migrate = Migrate()
-
 
 def create_app():
     app = Flask(__name__)
@@ -20,6 +19,7 @@ def create_app():
     # 블루프린트
     from .views import main_views, alarm_views
     app.register_blueprint(main_views.bp)
+    #main_views.py에서 생성한 블루프린트 객체 bp를 등록
     app.register_blueprint(alarm_views.bp)
 
     return app

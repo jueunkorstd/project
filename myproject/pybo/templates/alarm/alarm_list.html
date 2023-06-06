@@ -1,5 +1,11 @@
 {% extends 'base.html' %} {% block content %}
 <div class="container my-3">
+  <h1>Current Datetime</h1>
+  <!-- 현재 시각을 보여주는 span -->
+  <span id="current-time">
+    {{ current_datetime.strftime('%Y-%m-%d %H:%M') }}
+  </span>
+
   <table class="table">
     <thead>
       <tr class="table-dark">
@@ -14,21 +20,22 @@
       <tr>
         <td>{{ loop.index }}</td>
         <td>
-          <a href="{{ url_for('alarm.detail', alarm_id=alarm.id) }}"
-            >{{ alarm.alarmName }}</a
-          >
+          <a href="{{ url_for('alarm.detail', alarm_id=alarm.id) }}">
+            {{ alarm.alarmName }}
+          </a>
         </td>
         <td>
-          <a href="{{ url_for('alarm.detail', alarm_id=alarm.id) }}"
-            >{{ alarm.alarmTime }}</a
-          >
+          <a href="{{ url_for('alarm.detail', alarm_id=alarm.id) }}">
+            {{ alarm.alarmTime }}
+          </a>
         </td>
         <td>
           <a
             href="{{ url_for('alarm.delete', alarm_id=alarm.id) }}"
             class="delete btn btn-sm btn-outline-secondary"
-            >삭제</a
           >
+            삭제
+          </a>
         </td>
       </tr>
       {% endfor %} {% else %}
@@ -42,4 +49,27 @@
     >질문 등록하기</a
   >
 </div>
+{% endblock %} {% block script %}
+<script>
+  // 현재 시각을 업데이트하는 함수
+  function updateCurrentTime() {
+    var now = new Date();
+    var currentTimeElement = document.getElementById("current-time");
+    currentTimeElement.textContent =
+      now.getFullYear() +
+      "-" +
+      (now.getMonth() + 1).toString().padStart(2, "0") +
+      "-" +
+      now.getDate().toString().padStart(2, "0") +
+      " " +
+      now.getHours().toString().padStart(2, "0") +
+      ":" +
+      now.getMinutes().toString().padStart(2, "0") +
+      ":" +
+      now.getSeconds().toString().padStart(2, "0");
+  }
+
+  // 초 단위로 현재 시각 업데이트 실행
+  setInterval(updateCurrentTime, 1000); // 1000ms = 1초
+</script>
 {% endblock %}

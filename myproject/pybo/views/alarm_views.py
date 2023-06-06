@@ -1,5 +1,7 @@
 from flask import Blueprint, render_template, request, url_for
 from werkzeug.utils import redirect
+from datetime import datetime
+
 
 from pybo import db
 from pybo.models import Alarm
@@ -12,10 +14,11 @@ bp = Blueprint('alarm', __name__, url_prefix='/alarm')
 
 @bp.route('/ilst/')
 def _list():
+    current_datetime = datetime.now()
     page = request.args.get('page', type=int, default=1)
     alarm_list = Alarm.query.order_by(Alarm.alarmTime.asc())
     alarm_list = alarm_list.paginate(page=page, per_page=10)
-    return render_template('alarm/alarm_list.html', alarm_list=alarm_list)
+    return render_template('alarm/alarm_list.html', alarm_list=alarm_list, current_datetime=current_datetime)
 
 @bp.route('/detail/<int:alarm_id>/')
 def detail(alarm_id):

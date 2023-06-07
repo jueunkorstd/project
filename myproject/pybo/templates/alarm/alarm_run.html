@@ -1,0 +1,8 @@
+{% extends 'base.html' %} {% block content %}
+<h1>Alarm Run</h1>
+<p>Current Datetime: {{ current_datetime.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+
+<form method="POST" action="{{ url_for('alarm.stop_alarm') }}">
+  <button type="submit">Stop Alarm</button>
+</form>
+{% endblock %}

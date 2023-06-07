@@ -71,5 +71,15 @@
 
   // 초 단위로 현재 시각 업데이트 실행
   setInterval(updateCurrentTime, 1000); // 1000ms = 1초
+  function refreshPageIfSecondZero() {
+    var currentDate = new Date();
+    var currentSecond = currentDate.getSeconds();
+
+    if (currentSecond === 0) {
+      location.reload();
+    }
+  }
+
+  setInterval(refreshPageIfSecondZero, 1000); // 1초마다 함수 호출
 </script>
 {% endblock %}

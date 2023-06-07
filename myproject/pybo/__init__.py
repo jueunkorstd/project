@@ -22,4 +22,6 @@ def create_app():
     #main_views.py에서 생성한 블루프린트 객체 bp를 등록
     app.register_blueprint(alarm_views.bp)
 
+    
+
     return app

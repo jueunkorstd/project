@@ -1,17 +1,34 @@
 from flask import Blueprint, render_template, request, url_for
 from werkzeug.utils import redirect
-from datetime import datetime
+from datetime import datetime, timedelta
 import paho.mqtt.client as mqtt
-
 
 from pybo import db
 from pybo.models import Alarm
 from pybo.forms import AlarmForm
 
-# MQTT 브로커에 연결합니다
-broker_url = '44.202.115.227'  # MQTT 브로커의 URL을 입력하세요
-broker_port = 1883  # MQTT 브로커의 포트 번호를 입력하세요
+broker_url = '44.202.115.227'
+broker_port = 1883
 client = mqtt.Client()
+
+def on_connect(client, userdata, flags, rc):
+    print('MQTT 브로커에 연결되었습니다.')
+    topic = 'home/garden/fountain'
+    client.subscribe(topic)
+    print('토픽 구독 성공:', topic)
+
+def on_message(client, userdata, msg):
+    print('새로운 메시지 수신:', msg.topic, msg.payload.decode())
+    
+def on_error(client, userdata, msg):
+    print('MQTT 오류:', msg)
+
+client.on_connect = on_connect
+client.on_message = on_message
+client.on_error = on_error
+
+client.connect(broker_url, broker_port, 60)
+client.loop_start()
 
 bp = Blueprint('alarm', __name__, url_prefix='/alarm')
 #alarm이라는 이름으로 블루프린트 객체를 생성
@@ -23,8 +40,35 @@ def _list():
     current_datetime = datetime.now()
     page = request.args.get('page', type=int, default=1)
     alarm_list = Alarm.query.order_by(Alarm.alarmTime.asc())
-    alarm_list = alarm_list.paginate(page=page, per_page=10)
+    alarm_list = alarm_list.paginate(page=page, per_page=100)
+
+
+    for alarm in alarm_list.items:  # 페이지의 항목들을 순회합니다.
+        alarm_datetime = datetime.strptime(alarm.alarmTime, '%H:%M')
+        alarm_time = alarm_datetime.replace(second=0, microsecond=0).time()
+        current_time = current_datetime.replace(second=0, microsecond=0).time()
+        if alarm_time.hour == current_time.hour and alarm_time.minute == current_time.minute:
+                print("Alarm!")
+                return redirect(url_for('alarm.alarm_run'))
+        
     return render_template('alarm/alarm_list.html', alarm_list=alarm_list, current_datetime=current_datetime)
+
+@bp.route('/alarm/run/')
+def alarm_run():
+    current_datetime = datetime.now()
+    print("Alarm On")
+    #GPIO로 led, buzzer 제어
+    return render_template('alarm/alarm_run.html', current_datetime=current_datetime)
+
+@bp.route('/alarm/stop/', methods=['POST'])
+def stop_alarm():
+    print("Alarm Off")
+    # 알람을 끄는 로직 구현
+    # GPIO 등을 사용하여 알람을 제어
+    
+    # 알람을 끄고 나서 다른 페이지로 리다이렉트
+    current_datetime = datetime.now()
+    return redirect(url_for('main.index'))
 
 @bp.route('/detail/<int:alarm_id>/')
 def detail(alarm_id):
@@ -47,32 +91,3 @@ def delete(alarm_id):
     db.session.delete(alarm)
     db.session.commit()
     return redirect(url_for('main.index'))
-
-# MQTT 브로커에 연결합니다
-broker_url = '44.202.115.227'  # MQTT 브로커의 URL을 입력하세요
-broker_port = 1883  # MQTT 브로커의 포트 번호를 입력하세요
-client = mqtt.Client()
-
-# 연결 성공 시 실행됩니다
-def on_connect(client, userdata, flags, rc):
-    print('MQTT 브로커에 연결되었습니다.')
-    # 토픽을 구독합니다
-    topic = 'home/garden/fountain'  # 구독할 토픽을 입력하세요
-    client.subscribe(topic)
-    print('토픽 구독 성공:', topic)
-
-# 메시지를 수신할 때 실행됩니다
-def on_message(client, userdata, msg):
-    print('새로운 메시지 수신:', msg.topic, msg.payload.decode())
-    # 메시지를 처리하는 추가 로직을 여기에 작성하세요
-
-# 오류 발생 시 실행됩니다
-def on_error(client, userdata, msg):
-    print('MQTT 오류:', msg)
-
-client.on_connect = on_connect
-client.on_message = on_message
-client.on_error = on_error
-
-client.connect(broker_url, broker_port, 60)
-client.loop_start()
